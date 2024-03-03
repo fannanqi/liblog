@@ -2,8 +2,8 @@
  * @Author: fannanqi 1773252187@qq.com
  * @Date: 2024-03-01 13:46:49
  * @LastEditors: fannanqi 1773252187@qq.com
- * @LastEditTime: 2024-03-01 14:08:03
- * @FilePath: /liblog/include/logger.h
+ * @LastEditTime: 2024-03-03 15:41:16
+ * @FilePath: /liblog/src/include/logger.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 #pragma once
@@ -16,6 +16,8 @@ enum LogLevel
 {
     INFO,  // 普通信息
     ERROR, // 错误信息
+    FATAL, // core信息
+    DEBUG, // 调试信息
 };
 
 // Mprpc框架提供的日志系统
@@ -27,6 +29,8 @@ private:
     Logger(const Logger &) = delete;
 
     Logger(Logger &&) = delete;
+
+    Logger &operator=(const Logger &) = delete;
 
     ~Logger();
 
@@ -69,6 +73,30 @@ public:
         _loggerMutex.lock();                            \
         Logger *logger = Logger::GetInstance();         \
         logger->SetLogLevel(ERROR);                     \
+        char c[1024] = {0};                             \
+        snprintf(c, 1024, logmsgformat, ##__VA_ARGS__); \
+        logger->Log(c);                                 \
+        _loggerMutex.unlock();                          \
+    } while (0);
+
+#define LOG_FATAL(logmsgformat, ...)                    \
+    do                                                  \
+    {                                                   \
+        _loggerMutex.lock();                            \
+        Logger *logger = Logger::GetInstance();         \
+        logger->SetLogLevel(FATAL);                     \
+        char c[1024] = {0};                             \
+        snprintf(c, 1024, logmsgformat, ##__VA_ARGS__); \
+        logger->Log(c);                                 \
+        _loggerMutex.unlock();                          \
+    } while (0);
+
+#define LOG_DEBUG(logmsgformat, ...)                    \
+    do                                                  \
+    {                                                   \
+        _loggerMutex.lock();                            \
+        Logger *logger = Logger::GetInstance();         \
+        logger->SetLogLevel(DEBUG);                     \
         char c[1024] = {0};                             \
         snprintf(c, 1024, logmsgformat, ##__VA_ARGS__); \
         logger->Log(c);                                 \

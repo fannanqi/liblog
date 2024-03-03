@@ -61,10 +61,29 @@ Logger::Logger()
             //  拿取消息队列的日志消息
             std::string msg=_mlckQue.Pop();
             char time_buf[128]={0};
+            std::string typemsg;
+            switch (_mloglevel)
+            {
+            case INFO:
+                typemsg= "INFO";
+                break;
+            case ERROR:
+                typemsg= "ERROR";
+                break;
+            case FATAL:
+                typemsg= "FATAL";
+                break;
+            case DEBUG:
+                typemsg= "DEBUG";
+                break;  
+            default:
+                typemsg = "NULL";
+                break;
+            }
             sprintf(time_buf,"%d:%d:%d =>[%s]",_nowtime->tm_hour,
                             _nowtime->tm_min,
                             _nowtime->tm_sec,
-                            (_mloglevel==INFO ? "info":"error"));
+                            typemsg.c_str());
             msg.insert(0,time_buf);
             //  将日志写入文件当中
             ofs<<msg<<std::endl;
@@ -89,7 +108,7 @@ void Logger::SetLogLevel(LogLevel level)
 void Logger::Log(std::string msg)
 {
     _mlckQue.Push(msg);
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(70));
 }
 
 Logger *Logger::GetInstance()
